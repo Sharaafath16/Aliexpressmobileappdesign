@@ -28,11 +28,16 @@ import { SortSheet } from "./components/SortSheet";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Cart } from "./pages/Cart";
 import { Checkout } from "./pages/Checkout";
+import { Categories } from "./pages/Categories";
+import { Orders } from "./pages/Orders";
+import { Account } from "./pages/Account";
+import { CategoryPage } from "./pages/CategoryPage";
+import { AdminPanel } from "./pages/AdminPanel";
 import { CartProvider, useCart } from "./context/CartContext";
 import { flashDeals, products } from "./data/mockProducts";
 import { Toaster } from "./components/ui/sonner";
 
-type Page = "home" | "product-detail" | "cart" | "checkout";
+type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin";
 
 function AppContent() {
   const { getCartCount } = useCart();
@@ -40,6 +45,7 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState("home");
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [showFilterSheet, setShowFilterSheet] = useState(false);
   const [showSortSheet, setShowSortSheet] = useState(false);
   const [selectedSort, setSelectedSort] = useState("recommended");
@@ -82,6 +88,11 @@ function AppContent() {
     setActiveTab("orders");
   };
 
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setCurrentPage("category-page");
+  };
+
   const sortProducts = (productList: typeof products) => {
     const sorted = [...productList];
     switch (selectedSort) {
@@ -100,18 +111,52 @@ function AppContent() {
 
   const filteredProducts = sortProducts(products);
 
+  // Admin Panel
+  if (currentPage === "admin") {
+    return <AdminPanel onLogout={handleBackToHome} />;
+  }
+
+  // Product Detail
   if (currentPage === "product-detail" && selectedProduct) {
     return (
       <ProductDetail product={selectedProduct} onBack={handleBackToHome} />
     );
   }
 
+  // Cart
   if (currentPage === "cart") {
     return <Cart onBack={handleBackToHome} onCheckout={handleCheckoutClick} />;
   }
 
+  // Checkout
   if (currentPage === "checkout") {
     return <Checkout onBack={() => setCurrentPage("cart")} onComplete={handleOrderComplete} />;
+  }
+
+  // Categories
+  if (currentPage === "categories") {
+    return <Categories onBack={handleBackToHome} onCategoryClick={handleCategoryClick} />;
+  }
+
+  // Orders
+  if (currentPage === "orders") {
+    return <Orders onBack={handleBackToHome} />;
+  }
+
+  // Account
+  if (currentPage === "account") {
+    return <Account onBack={handleBackToHome} />;
+  }
+
+  // Category Page
+  if (currentPage === "category-page" && selectedCategoryId) {
+    return (
+      <CategoryPage
+        categoryId={selectedCategoryId}
+        onBack={handleBackToHome}
+        onProductClick={handleProductClick}
+      />
+    );
   }
 
   return (
@@ -121,7 +166,14 @@ function AppContent() {
         <div className="p-4 space-y-3">
           {/* Top Bar */}
           <div className="flex items-center justify-between">
-            <h1>AliExpress</h1>
+            <h1 onClick={() => {
+              const clicks = (window as any).adminClicks || 0;
+              (window as any).adminClicks = clicks + 1;
+              if ((window as any).adminClicks >= 5) {
+                setCurrentPage("admin");
+                (window as any).adminClicks = 0;
+              }
+            }}>AliExpress</h1>
             <div className="flex items-center gap-4">
               <button>
                 <Bell className="w-5 h-5" />
@@ -249,7 +301,10 @@ function AppContent() {
             <span className="text-xs">Home</span>
           </button>
           <button
-            onClick={() => setActiveTab("categories")}
+            onClick={() => {
+              setActiveTab("categories");
+              setCurrentPage("categories");
+            }}
             className={`flex flex-col items-center justify-center gap-1 ${
               activeTab === "categories" ? "text-red-500" : "text-gray-500"
             }`}
@@ -258,7 +313,10 @@ function AppContent() {
             <span className="text-xs">Categories</span>
           </button>
           <button
-            onClick={() => setActiveTab("orders")}
+            onClick={() => {
+              setActiveTab("orders");
+              setCurrentPage("orders");
+            }}
             className={`flex flex-col items-center justify-center gap-1 ${
               activeTab === "orders" ? "text-red-500" : "text-gray-500"
             }`}
@@ -267,7 +325,10 @@ function AppContent() {
             <span className="text-xs">Orders</span>
           </button>
           <button
-            onClick={() => setActiveTab("account")}
+            onClick={() => {
+              setActiveTab("account");
+              setCurrentPage("account");
+            }}
             className={`flex flex-col items-center justify-center gap-1 ${
               activeTab === "account" ? "text-red-500" : "text-gray-500"
             }`}
