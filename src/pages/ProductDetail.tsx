@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   ShoppingCart,
@@ -16,8 +16,10 @@ import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ReviewCard } from "../components/ReviewCard";
 import { useCart } from "../context/CartContext";
-import { mockReviews, specifications } from "../data/mockReviews";
+import { specifications } from "../data/mockReviews";
 import { toast } from "sonner@2.0.3";
+import { getReviewsByProduct } from "../services/reviewService";
+import { Review } from "../lib/supabase";
 
 interface ProductDetailProps {
   product: {
@@ -39,9 +41,19 @@ export function ProductDetail({ product, onBack }: ProductDetailProps) {
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   const colors = ["Black", "White", "Blue", "Red"];
   const sizes = ["S", "M", "L", "XL"];
+
+  useEffect(() => {
+    loadReviews();
+  }, [product.id]);
+
+  async function loadReviews() {
+    const reviewsData = await getReviewsByProduct(product.id);
+    setReviews(reviewsData);
+  }
 
   const handleAddToCart = () => {
     addToCart({
@@ -205,11 +217,11 @@ export function ProductDetail({ product, onBack }: ProductDetailProps) {
       <div className="bg-white mt-2">
         <Tabs defaultValue="reviews" className="w-full">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="reviews">Reviews ({mockReviews.length})</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
             <TabsTrigger value="specs">Specifications</TabsTrigger>
           </TabsList>
           <TabsContent value="reviews" className="px-4 py-4 space-y-4">
-            {mockReviews.map((review) => (
+            {reviews.map((review) => (
               <ReviewCard key={review.id} {...review} />
             ))}
           </TabsContent>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   ShoppingCart,
@@ -34,8 +34,9 @@ import { Account } from "./pages/Account";
 import { CategoryPage } from "./pages/CategoryPage";
 import { AdminPanel } from "./pages/AdminPanel";
 import { CartProvider, useCart } from "./context/CartContext";
-import { flashDeals, products } from "./data/mockProducts";
 import { Toaster } from "./components/ui/sonner";
+import { getProducts, getFlashDeals } from "./services/productService";
+import { Product } from "./lib/supabase";
 
 type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin";
 
@@ -55,6 +56,24 @@ function AppContent() {
     rating: 0,
     freeShipping: false,
   });
+  const [products, setProducts] = useState<Product[]>([]);
+  const [flashDeals, setFlashDeals] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    setIsLoading(true);
+    const [productsData, flashDealsData] = await Promise.all([
+      getProducts(),
+      getFlashDeals(),
+    ]);
+    setProducts(productsData);
+    setFlashDeals(flashDealsData);
+    setIsLoading(false);
+  }
 
   const categories = [
     { id: "all", icon: <Sparkles className="w-6 h-6" />, label: "All" },
@@ -93,15 +112,15 @@ function AppContent() {
     setCurrentPage("category-page");
   };
 
-  const sortProducts = (productList: typeof products) => {
+  const sortProducts = (productList: Product[]) => {
     const sorted = [...productList];
     switch (selectedSort) {
       case "price-low":
-        return sorted.sort((a, b) => a.price - b.price);
+        return sorted.sort((a, b) => Number(a.price) - Number(b.price));
       case "price-high":
-        return sorted.sort((a, b) => b.price - a.price);
+        return sorted.sort((a, b) => Number(b.price) - Number(a.price));
       case "rating":
-        return sorted.sort((a, b) => b.rating - a.rating);
+        return sorted.sort((a, b) => Number(b.rating) - Number(a.rating));
       case "popular":
         return sorted.sort((a, b) => b.sold - a.sold);
       default:

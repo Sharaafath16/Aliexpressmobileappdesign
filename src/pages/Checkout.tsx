@@ -6,6 +6,7 @@ import { Label } from "../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner@2.0.3";
+import { createOrder, createOrderItems } from "../services/orderService";
 
 interface CheckoutProps {
   onBack: () => void;
@@ -37,10 +38,40 @@ export function Checkout({ onBack, onComplete }: CheckoutProps) {
   const shippingCost = 5.99;
   const total = getCartTotal() + shippingCost;
 
-  const handlePlaceOrder = () => {
-    toast.success("Order placed successfully!");
-    clearCart();
-    onComplete();
+  const handlePlaceOrder = async () => {
+    const userId = `guest_${Date.now()}`;
+
+    const order = await createOrder({
+      user_id: userId,
+      total: total,
+      shipping_name: address.fullName,
+      shipping_address: address.street,
+      shipping_city: address.city,
+      shipping_country: address.country,
+      shipping_zip: address.zipCode,
+    });
+
+    if (order) {
+      const orderItems = cart.map(item => ({
+        order_id: order.id,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        variant: item.variant,
+      }));
+
+      const success = await createOrderItems(orderItems);
+
+      if (success) {
+        toast.success("Order placed successfully!");
+        clearCart();
+        onComplete();
+      } else {
+        toast.error("Failed to create order items");
+      }
+    } else {
+      toast.error("Failed to create order");
+    }
   };
 
   return (
