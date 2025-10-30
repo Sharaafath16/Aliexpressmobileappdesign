@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   ShoppingCart,
@@ -15,11 +15,11 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ReviewCard } from "../components/ReviewCard";
+import { StockAlert } from "../components/StockAlert";
+import { CountdownTimer } from "../components/CountdownTimer";
 import { useCart } from "../context/CartContext";
-import { specifications } from "../data/mockReviews";
+import { mockReviews, specifications } from "../data/mockReviews";
 import { toast } from "sonner@2.0.3";
-import { getReviewsByProduct } from "../services/reviewService";
-import { Review } from "../lib/supabase";
 
 interface ProductDetailProps {
   product: {
@@ -41,19 +41,9 @@ export function ProductDetail({ product, onBack }: ProductDetailProps) {
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [reviews, setReviews] = useState<Review[]>([]);
 
   const colors = ["Black", "White", "Blue", "Red"];
   const sizes = ["S", "M", "L", "XL"];
-
-  useEffect(() => {
-    loadReviews();
-  }, [product.id]);
-
-  async function loadReviews() {
-    const reviewsData = await getReviewsByProduct(product.id);
-    setReviews(reviewsData);
-  }
 
   const handleAddToCart = () => {
     addToCart({
@@ -120,19 +110,37 @@ export function ProductDetail({ product, onBack }: ProductDetailProps) {
         <div className="flex items-center gap-3 mb-2">
           <span className="text-red-500">US ${product.price.toFixed(2)}</span>
           {product.originalPrice && (
-            <span className="text-gray-400 line-through">
-              ${product.originalPrice.toFixed(2)}
-            </span>
+            <>
+              <span className="text-gray-400 line-through">
+                ${product.originalPrice.toFixed(2)}
+              </span>
+              {product.discount && (
+                <Badge className="bg-red-500 border-0">-{product.discount}% OFF</Badge>
+              )}
+            </>
           )}
         </div>
         <h1 className="text-lg mb-3">{product.title}</h1>
-        <div className="flex items-center gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span>{product.rating}</span>
           </div>
           <span>{product.sold.toLocaleString()} sold</span>
         </div>
+        
+        {/* Stock Alert */}
+        <StockAlert stock={15} totalSold={product.sold} />
+        
+        {/* Flash Sale Timer */}
+        {product.discount && product.discount > 30 && (
+          <div className="mt-3 p-3 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Flash Sale Ends:</span>
+              <CountdownTimer hours={3} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Shipping Info */}
@@ -217,11 +225,11 @@ export function ProductDetail({ product, onBack }: ProductDetailProps) {
       <div className="bg-white mt-2">
         <Tabs defaultValue="reviews" className="w-full">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews ({mockReviews.length})</TabsTrigger>
             <TabsTrigger value="specs">Specifications</TabsTrigger>
           </TabsList>
           <TabsContent value="reviews" className="px-4 py-4 space-y-4">
-            {reviews.map((review) => (
+            {mockReviews.map((review) => (
               <ReviewCard key={review.id} {...review} />
             ))}
           </TabsContent>

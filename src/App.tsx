@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Search,
   ShoppingCart,
@@ -33,10 +33,16 @@ import { Orders } from "./pages/Orders";
 import { Account } from "./pages/Account";
 import { CategoryPage } from "./pages/CategoryPage";
 import { AdminPanel } from "./pages/AdminPanel";
+import { Footer } from "./components/Footer";
+import { PromoBanner } from "./components/PromoBanner";
+import { LiveActivity } from "./components/LiveActivity";
+import { CountdownTimer } from "./components/CountdownTimer";
+import { VideoShowcase } from "./components/VideoShowcase";
+import { FloatingChat } from "./components/FloatingChat";
+import { NotificationBanner } from "./components/NotificationBanner";
 import { CartProvider, useCart } from "./context/CartContext";
+import { flashDeals, products } from "./data/mockProducts";
 import { Toaster } from "./components/ui/sonner";
-import { getProducts, getFlashDeals } from "./services/productService";
-import { Product } from "./lib/supabase";
 
 type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin";
 
@@ -56,24 +62,6 @@ function AppContent() {
     rating: 0,
     freeShipping: false,
   });
-  const [products, setProducts] = useState<Product[]>([]);
-  const [flashDeals, setFlashDeals] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    setIsLoading(true);
-    const [productsData, flashDealsData] = await Promise.all([
-      getProducts(),
-      getFlashDeals(),
-    ]);
-    setProducts(productsData);
-    setFlashDeals(flashDealsData);
-    setIsLoading(false);
-  }
 
   const categories = [
     { id: "all", icon: <Sparkles className="w-6 h-6" />, label: "All" },
@@ -112,15 +100,15 @@ function AppContent() {
     setCurrentPage("category-page");
   };
 
-  const sortProducts = (productList: Product[]) => {
+  const sortProducts = (productList: typeof products) => {
     const sorted = [...productList];
     switch (selectedSort) {
       case "price-low":
-        return sorted.sort((a, b) => Number(a.price) - Number(b.price));
+        return sorted.sort((a, b) => a.price - b.price);
       case "price-high":
-        return sorted.sort((a, b) => Number(b.price) - Number(a.price));
+        return sorted.sort((a, b) => b.price - a.price);
       case "rating":
-        return sorted.sort((a, b) => Number(b.rating) - Number(a.rating));
+        return sorted.sort((a, b) => b.rating - a.rating);
       case "popular":
         return sorted.sort((a, b) => b.sold - a.sold);
       default:
@@ -164,7 +152,12 @@ function AppContent() {
 
   // Account
   if (currentPage === "account") {
-    return <Account onBack={handleBackToHome} />;
+    return (
+      <Account
+        onBack={handleBackToHome}
+        onAdminLogin={() => setCurrentPage("admin")}
+      />
+    );
   }
 
   // Category Page
@@ -179,7 +172,10 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20 overflow-x-hidden">
+      {/* Notification Banner */}
+      <NotificationBanner />
+
       {/* Header */}
       <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white sticky top-0 z-50">
         <div className="p-4 space-y-3">
@@ -219,9 +215,9 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="bg-white p-4 overflow-x-auto">
-        <div className="flex gap-4">
+      {/* Categories - No scrollbar */}
+      <div className="bg-white p-4">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {categories.map((category) => (
             <CategoryPill
               key={category.id}
@@ -234,31 +230,51 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Banner Section */}
-      <div className="px-4 pt-4">
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
-          <h2>Super Deals</h2>
-          <p className="text-sm opacity-90 mt-1">Up to 50% OFF on selected items</p>
-          <button className="bg-white text-purple-600 px-4 py-2 rounded-full mt-4 text-sm">
-            Shop Now
-          </button>
-        </div>
+      {/* Promotional Banners */}
+      <div className="px-4 pt-3">
+        <PromoBanner
+          imageUrl="https://images.unsplash.com/photo-1580978608550-0390af9b72b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzYWxlJTIwZGlzY291bnQlMjBiYW5uZXJ8ZW58MXx8fHwxNzYxODE1NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+          title="Mega Sale"
+          subtitle="Up to 70% OFF"
+          buttonText="Shop Now"
+          onButtonClick={() => {}}
+        />
       </div>
 
-      {/* Flash Deals */}
-      <div className="mt-4 bg-white">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-            <h2>Flash Deals</h2>
+      {/* Live Activity Feed */}
+      <div className="px-4 pt-3">
+        <LiveActivity />
+      </div>
+
+      {/* Video Showcase */}
+      <div className="px-4 pt-3">
+        <VideoShowcase
+          thumbnail="https://images.unsplash.com/photo-1464854860390-e95991b46441?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwbW9kZWwlMjBiYW5uZXJ8ZW58MXx8fHwxNzYxNzQ4NjAzfDA&ixlib=rb-4.1.0&q=80&w=1080"
+          title="Live Fashion Show"
+          description="Exclusive collection reveal"
+        />
+      </div>
+
+      {/* Flash Deals with Countdown */}
+      <div className="mt-3 bg-white">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+              <h2>Flash Deals</h2>
+            </div>
+            <button className="flex items-center gap-1 text-sm text-red-500">
+              View All
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
-          <button className="flex items-center gap-1 text-sm text-red-500">
-            View All
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-600">Ends in:</span>
+            <CountdownTimer hours={6} />
+          </div>
         </div>
-        <div className="px-4 pb-4 overflow-x-auto">
-          <div className="flex gap-3">
+        <div className="pb-4">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4">
             {flashDeals.map((deal) => (
               <div key={deal.id} onClick={() => handleProductClick(deal)}>
                 <FlashDealCard {...deal} />
@@ -268,13 +284,24 @@ function AppContent() {
         </div>
       </div>
 
+      {/* Mid Banner - Electronics */}
+      <div className="px-4 pt-3">
+        <PromoBanner
+          imageUrl="https://images.unsplash.com/photo-1582018960590-f3bc3ea25c04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVjdHJvbmljcyUyMGdhZGdldHMlMjBiYW5uZXJ8ZW58MXx8fHwxNzYxODE1NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+          title="Tech Gadgets"
+          subtitle="Latest arrivals"
+          buttonText="Explore"
+          onButtonClick={() => {}}
+        />
+      </div>
+
       {/* Filter and Sort */}
-      <div className="px-4 mt-4 flex gap-2">
+      <div className="px-4 mt-3 flex gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowFilterSheet(true)}
-          className="flex-1 flex items-center gap-2"
+          className="flex-1 flex items-center justify-center gap-2"
         >
           <Filter className="w-4 h-4" />
           Filter
@@ -283,7 +310,7 @@ function AppContent() {
           variant="outline"
           size="sm"
           onClick={() => setShowSortSheet(true)}
-          className="flex-1 flex items-center gap-2"
+          className="flex-1 flex items-center justify-center gap-2"
         >
           <ArrowUpDown className="w-4 h-4" />
           Sort
@@ -291,18 +318,21 @@ function AppContent() {
       </div>
 
       {/* Just For You */}
-      <div className="mt-4">
-        <div className="px-4 py-3 bg-white">
+      <div className="mt-3 bg-white">
+        <div className="px-4 py-3">
           <h2>Just For You</h2>
         </div>
-        <div className="px-4 pt-4 grid grid-cols-2 gap-3">
-          {filteredProducts.map((product) => (
-            <div key={product.id} onClick={() => handleProductClick(product)}>
-              <ProductCard {...product} />
-            </div>
-          ))}
-        </div>
       </div>
+      <div className="px-4 pt-3 pb-4 grid grid-cols-2 gap-3">
+        {filteredProducts.map((product) => (
+          <div key={product.id} onClick={() => handleProductClick(product)}>
+            <ProductCard {...product} />
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
@@ -373,6 +403,9 @@ function AppContent() {
         selectedSort={selectedSort}
         onSelectSort={setSelectedSort}
       />
+
+      {/* Floating Chat */}
+      <FloatingChat />
     </div>
   );
 }

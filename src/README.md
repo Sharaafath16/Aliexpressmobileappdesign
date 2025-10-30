@@ -55,15 +55,22 @@ A fully functional mobile e-commerce application inspired by AliExpress, built w
 - Order statistics dashboard
 
 ### 👤 Account Page
-- User profile with avatar
-- Account statistics (Orders, Wishlist, Coupons)
-- Membership level with progress bar
-- Organized settings menu:
-  - Orders & Shopping section
-  - Account Settings section
-  - Support & Info section
-- Badge notifications
-- Logout functionality
+- **Login System:**
+  - Beautiful login form with email and password fields
+  - Admin login detection (redirects to admin panel)
+  - Demo credentials displayed for easy testing
+  - Forgot password option
+  - Sign up option
+- **User Profile (After Login):**
+  - User profile with avatar
+  - Account statistics (Orders, Wishlist, Coupons)
+  - Membership level with progress bar
+  - Organized settings menu:
+    - Orders & Shopping section
+    - Account Settings section
+    - Support & Info section
+  - Badge notifications
+  - Logout functionality
 
 ### 🏷️ Category Pages (Electronics, Fashion, Beauty, Sports, Toys)
 - Category-specific banners
@@ -123,12 +130,26 @@ A fully functional mobile e-commerce application inspired by AliExpress, built w
 - Responsive layout for desktop
 
 ### 📦 Additional Features
+- **Footer Section:**
+  - Feature highlights (Great value, Worldwide shipping, Safe payment, etc.)
+  - Social media links (Stay connected section)
+  - Navigation links organized by category:
+    - Shopping with us
+    - Customer service
+    - Collaborate with us
+  - Help and support links
+  - Browse by category section
+  - App store download buttons (Google Play & App Store)
+  - Multi-language sites information
+  - Alibaba Group links
+  - Legal and privacy information
+  - Copyright notice
 - Toast notifications for user actions
 - Responsive design optimized for mobile
 - Smooth transitions and hover effects
 - Mock data for realistic product display
 - Context-based state management for cart
-- Secret admin access (click logo 5 times)
+- Multiple admin access methods (login or secret click)
 
 ## Technology Stack
 
@@ -149,8 +170,18 @@ A fully functional mobile e-commerce application inspired by AliExpress, built w
 - Click category pills to filter products
 - Click "View All" or category cards to visit category-specific pages
 
-**Admin Panel:**
-- Click the "AliExpress" logo 5 times rapidly to access the admin panel
+**Admin Panel Access (Two Methods):**
+1. **Login Method (Recommended):**
+   - Navigate to the Account page using the bottom navigation
+   - Enter the admin credentials:
+     - Email: `admin@gmail.com`
+     - Password: `admin123@`
+   - Click "Sign In" to access the admin panel
+   
+2. **Quick Access:**
+   - Click the "AliExpress" logo 5 times rapidly on the home page
+
+**Admin Panel Navigation:**
 - Use the sidebar to navigate between Dashboard, Products, Orders, Users, Analytics, and Settings
 - Click the collapse button to minimize the sidebar
 - Click Logout to return to the customer app

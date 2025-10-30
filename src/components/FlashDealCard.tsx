@@ -16,7 +16,7 @@ export function FlashDealCard({
   discount,
 }: FlashDealCardProps) {
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-sm min-w-[140px] cursor-pointer hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-lg overflow-hidden shadow-sm w-[135px] flex-shrink-0 cursor-pointer hover:shadow-md transition-shadow">
       <div className="relative aspect-square">
         <ImageWithFallback
           src={image}
@@ -27,10 +27,10 @@ export function FlashDealCard({
           -{discount}%
         </div>
       </div>
-      <div className="p-2 space-y-1">
+      <div className="p-2.5 space-y-1">
         <p className="text-sm line-clamp-1">{title}</p>
-        <div className="flex items-center gap-2">
-          <span className="text-red-500">US ${price.toFixed(2)}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-red-500 text-sm">US ${price.toFixed(2)}</span>
           <span className="text-gray-400 line-through text-xs">
             ${originalPrice.toFixed(2)}
           </span>

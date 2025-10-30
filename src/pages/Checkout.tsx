@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, CreditCard, Truck, CheckCircle } from "lucide-react";
+import { ArrowLeft, MapPin, CreditCard, Truck, CheckCircle, Wallet, Building, Smartphone } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner@2.0.3";
-import { createOrder, createOrderItems } from "../services/orderService";
 
 interface CheckoutProps {
   onBack: () => void;
@@ -38,40 +37,10 @@ export function Checkout({ onBack, onComplete }: CheckoutProps) {
   const shippingCost = 5.99;
   const total = getCartTotal() + shippingCost;
 
-  const handlePlaceOrder = async () => {
-    const userId = `guest_${Date.now()}`;
-
-    const order = await createOrder({
-      user_id: userId,
-      total: total,
-      shipping_name: address.fullName,
-      shipping_address: address.street,
-      shipping_city: address.city,
-      shipping_country: address.country,
-      shipping_zip: address.zipCode,
-    });
-
-    if (order) {
-      const orderItems = cart.map(item => ({
-        order_id: order.id,
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-        variant: item.variant,
-      }));
-
-      const success = await createOrderItems(orderItems);
-
-      if (success) {
-        toast.success("Order placed successfully!");
-        clearCart();
-        onComplete();
-      } else {
-        toast.error("Failed to create order items");
-      }
-    } else {
-      toast.error("Failed to create order");
-    }
+  const handlePlaceOrder = () => {
+    toast.success("Order placed successfully!");
+    clearCart();
+    onComplete();
   };
 
   return (
@@ -224,17 +193,37 @@ export function Checkout({ onBack, onComplete }: CheckoutProps) {
           <h2 className="mb-4">Payment Method</h2>
           <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
             <div className="space-y-3">
-              <div className="flex items-center space-x-2 border rounded-lg p-3">
+              <div className="flex items-center space-x-3 border rounded-lg p-4 hover:border-red-500 transition-colors">
                 <RadioGroupItem value="card" id="card" />
-                <Label htmlFor="card" className="flex-1">Credit/Debit Card</Label>
+                <CreditCard className="w-5 h-5 text-gray-600" />
+                <div className="flex-1">
+                  <Label htmlFor="card" className="cursor-pointer">Credit/Debit Card</Label>
+                  <p className="text-xs text-gray-500">Visa, Mastercard, AMEX</p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2 border rounded-lg p-3">
+              <div className="flex items-center space-x-3 border rounded-lg p-4 hover:border-red-500 transition-colors">
                 <RadioGroupItem value="paypal" id="paypal" />
-                <Label htmlFor="paypal" className="flex-1">PayPal</Label>
+                <Wallet className="w-5 h-5 text-blue-600" />
+                <div className="flex-1">
+                  <Label htmlFor="paypal" className="cursor-pointer">PayPal</Label>
+                  <p className="text-xs text-gray-500">Pay with PayPal balance</p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2 border rounded-lg p-3">
+              <div className="flex items-center space-x-3 border rounded-lg p-4 hover:border-red-500 transition-colors">
                 <RadioGroupItem value="cod" id="cod" />
-                <Label htmlFor="cod" className="flex-1">Cash on Delivery</Label>
+                <Building className="w-5 h-5 text-green-600" />
+                <div className="flex-1">
+                  <Label htmlFor="cod" className="cursor-pointer">Cash on Delivery (COD)</Label>
+                  <p className="text-xs text-gray-500">Pay when you receive</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 border rounded-lg p-4 hover:border-red-500 transition-colors">
+                <RadioGroupItem value="wallet" id="wallet" />
+                <Smartphone className="w-5 h-5 text-purple-600" />
+                <div className="flex-1">
+                  <Label htmlFor="wallet" className="cursor-pointer">Digital Wallet</Label>
+                  <p className="text-xs text-gray-500">Apple Pay, Google Pay</p>
+                </div>
               </div>
             </div>
           </RadioGroup>
