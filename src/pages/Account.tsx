@@ -37,14 +37,30 @@ import { Card } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { AdminLogin } from "./AdminLogin";
 
 interface AccountProps {
   onBack: () => void;
-  onAdminLogin?: () => void;
+  onAdminAccess?: (admin: any) => void;
 }
 
-export function Account({ onBack, onAdminLogin }: AccountProps) {
+export function Account({ onBack, onAdminAccess }: AccountProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+
+  if (showAdminLogin) {
+    return (
+      <AdminLogin
+        onLoginSuccess={(admin) => {
+          setShowAdminLogin(false);
+          if (onAdminAccess) {
+            onAdminAccess(admin);
+          }
+        }}
+        onCancel={() => setShowAdminLogin(false)}
+      />
+    );
+  }
 
   // Quick login check - if not logged in, show simplified login
   if (!isLoggedIn) {
@@ -59,18 +75,17 @@ export function Account({ onBack, onAdminLogin }: AccountProps) {
             <p className="text-sm text-gray-500">Sign in to access your account</p>
           </div>
           <Button
-            onClick={() => {
-              setIsLoggedIn(true);
-              // Check for admin login
-              const email = "admin@gmail.com";
-              const password = "admin123@";
-              if (email === "admin@gmail.com" && password === "admin123@" && onAdminLogin) {
-                onAdminLogin();
-              }
-            }}
-            className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+            onClick={() => setIsLoggedIn(true)}
+            className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 mb-3"
           >
             Sign In / Sign Up
+          </Button>
+          <Button
+            onClick={() => setShowAdminLogin(true)}
+            variant="outline"
+            className="w-full"
+          >
+            Admin Login
           </Button>
         </Card>
       </div>

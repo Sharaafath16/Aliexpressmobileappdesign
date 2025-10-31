@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   ShoppingCart,
@@ -33,6 +33,7 @@ import { Orders } from "./pages/Orders";
 import { Account } from "./pages/Account";
 import { CategoryPage } from "./pages/CategoryPage";
 import { AdminPanel } from "./pages/AdminPanel";
+import { AdminDashboardNew } from "./pages/AdminDashboardNew";
 import { Footer } from "./components/Footer";
 import { PromoBanner } from "./components/PromoBanner";
 import { LiveActivity } from "./components/LiveActivity";
@@ -41,10 +42,11 @@ import { VideoShowcase } from "./components/VideoShowcase";
 import { FloatingChat } from "./components/FloatingChat";
 import { NotificationBanner } from "./components/NotificationBanner";
 import { CartProvider, useCart } from "./context/CartContext";
-import { flashDeals, products } from "./data/mockProducts";
+import { getProducts, getFlashDeals } from "./services/productService";
+import { Product } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 
-type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin";
+type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin" | "admin-dashboard";
 
 function AppContent() {
   const { getCartCount } = useCart();
@@ -62,6 +64,25 @@ function AppContent() {
     rating: 0,
     freeShipping: false,
   });
+  const [products, setProducts] = useState<Product[]>([]);
+  const [flashDeals, setFlashDeals] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [adminUser, setAdminUser] = useState<any>(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    setIsLoading(true);
+    const [productsData, flashDealsData] = await Promise.all([
+      getProducts(),
+      getFlashDeals(),
+    ]);
+    setProducts(productsData);
+    setFlashDeals(flashDealsData);
+    setIsLoading(false);
+  }
 
   const categories = [
     { id: "all", icon: <Sparkles className="w-6 h-6" />, label: "All" },
@@ -100,15 +121,15 @@ function AppContent() {
     setCurrentPage("category-page");
   };
 
-  const sortProducts = (productList: typeof products) => {
+  const sortProducts = (productList: Product[]) => {
     const sorted = [...productList];
     switch (selectedSort) {
       case "price-low":
-        return sorted.sort((a, b) => a.price - b.price);
+        return sorted.sort((a, b) => Number(a.price) - Number(b.price));
       case "price-high":
-        return sorted.sort((a, b) => b.price - a.price);
+        return sorted.sort((a, b) => Number(b.price) - Number(a.price));
       case "rating":
-        return sorted.sort((a, b) => b.rating - a.rating);
+        return sorted.sort((a, b) => Number(b.rating) - Number(a.rating));
       case "popular":
         return sorted.sort((a, b) => b.sold - a.sold);
       default:
@@ -117,6 +138,20 @@ function AppContent() {
   };
 
   const filteredProducts = sortProducts(products);
+
+  // Admin Dashboard
+  if (currentPage === "admin-dashboard" && adminUser) {
+    return (
+      <AdminDashboardNew
+        admin={adminUser}
+        onLogout={() => {
+          setAdminUser(null);
+          setCurrentPage("home");
+          setActiveTab("home");
+        }}
+      />
+    );
+  }
 
   // Admin Panel
   if (currentPage === "admin") {
@@ -155,7 +190,10 @@ function AppContent() {
     return (
       <Account
         onBack={handleBackToHome}
-        onAdminLogin={() => setCurrentPage("admin")}
+        onAdminAccess={(admin) => {
+          setAdminUser(admin);
+          setCurrentPage("admin-dashboard");
+        }}
       />
     );
   }
