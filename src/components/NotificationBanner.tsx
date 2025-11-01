@@ -73,7 +73,7 @@ export function NotificationBanner() {
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className={`${getBackground()} text-white overflow-hidden`}
+          className={`${getBackground()} text-white overflow-hidden fixed top-0 left-0 right-0 z-[60]`}
         >
           <div className="px-4 py-2 flex items-center gap-2">
             <div className="flex-shrink-0">{getIcon()}</div>

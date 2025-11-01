@@ -9,11 +9,19 @@ import {
   LogOut,
   Menu,
   X,
+  Image,
+  Bell,
+  Video,
+  Tag,
 } from "lucide-react";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { AdminProducts } from "./admin/AdminProducts";
 import { AdminOrders } from "./admin/AdminOrders";
 import { AdminUsers } from "./admin/AdminUsers";
+import { AdminBanners } from "./admin/AdminBanners";
+import { AdminNotifications } from "./admin/AdminNotifications";
+import { AdminVideos } from "./admin/AdminVideos";
+import { AdminCategories } from "./admin/AdminCategories";
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -28,6 +36,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     { id: "products", label: "Products", icon: Package },
     { id: "orders", label: "Orders", icon: ShoppingCart },
     { id: "users", label: "Users", icon: Users },
+    { id: "categories", label: "Categories", icon: Tag },
+    { id: "banners", label: "Banners", icon: Image },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "videos", label: "Videos", icon: Video },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -42,6 +54,14 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         return <AdminOrders />;
       case "users":
         return <AdminUsers />;
+      case "categories":
+        return <AdminCategories />;
+      case "banners":
+        return <AdminBanners />;
+      case "notifications":
+        return <AdminNotifications />;
+      case "videos":
+        return <AdminVideos />;
       case "analytics":
         return (
           <div className="flex items-center justify-center h-96">

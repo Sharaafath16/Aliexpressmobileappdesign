@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Search,
   ShoppingCart,
@@ -33,20 +33,18 @@ import { Orders } from "./pages/Orders";
 import { Account } from "./pages/Account";
 import { CategoryPage } from "./pages/CategoryPage";
 import { AdminPanel } from "./pages/AdminPanel";
-import { AdminDashboardNew } from "./pages/AdminDashboardNew";
 import { Footer } from "./components/Footer";
 import { PromoBanner } from "./components/PromoBanner";
-import { LiveActivity } from "./components/LiveActivity";
 import { CountdownTimer } from "./components/CountdownTimer";
 import { VideoShowcase } from "./components/VideoShowcase";
 import { FloatingChat } from "./components/FloatingChat";
 import { NotificationBanner } from "./components/NotificationBanner";
+import { BottomNavigation } from "./components/BottomNavigation";
 import { CartProvider, useCart } from "./context/CartContext";
-import { getProducts, getFlashDeals } from "./services/productService";
-import { Product } from "./lib/supabase";
+import { flashDeals, products } from "./data/mockProducts";
 import { Toaster } from "./components/ui/sonner";
 
-type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin" | "admin-dashboard";
+type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin";
 
 function AppContent() {
   const { getCartCount } = useCart();
@@ -64,25 +62,6 @@ function AppContent() {
     rating: 0,
     freeShipping: false,
   });
-  const [products, setProducts] = useState<Product[]>([]);
-  const [flashDeals, setFlashDeals] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [adminUser, setAdminUser] = useState<any>(null);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    setIsLoading(true);
-    const [productsData, flashDealsData] = await Promise.all([
-      getProducts(),
-      getFlashDeals(),
-    ]);
-    setProducts(productsData);
-    setFlashDeals(flashDealsData);
-    setIsLoading(false);
-  }
 
   const categories = [
     { id: "all", icon: <Sparkles className="w-6 h-6" />, label: "All" },
@@ -121,15 +100,15 @@ function AppContent() {
     setCurrentPage("category-page");
   };
 
-  const sortProducts = (productList: Product[]) => {
+  const sortProducts = (productList: typeof products) => {
     const sorted = [...productList];
     switch (selectedSort) {
       case "price-low":
-        return sorted.sort((a, b) => Number(a.price) - Number(b.price));
+        return sorted.sort((a, b) => a.price - b.price);
       case "price-high":
-        return sorted.sort((a, b) => Number(b.price) - Number(a.price));
+        return sorted.sort((a, b) => b.price - a.price);
       case "rating":
-        return sorted.sort((a, b) => Number(b.rating) - Number(a.rating));
+        return sorted.sort((a, b) => b.rating - a.rating);
       case "popular":
         return sorted.sort((a, b) => b.sold - a.sold);
       default:
@@ -139,20 +118,6 @@ function AppContent() {
 
   const filteredProducts = sortProducts(products);
 
-  // Admin Dashboard
-  if (currentPage === "admin-dashboard" && adminUser) {
-    return (
-      <AdminDashboardNew
-        admin={adminUser}
-        onLogout={() => {
-          setAdminUser(null);
-          setCurrentPage("home");
-          setActiveTab("home");
-        }}
-      />
-    );
-  }
-
   // Admin Panel
   if (currentPage === "admin") {
     return <AdminPanel onLogout={handleBackToHome} />;
@@ -161,51 +126,84 @@ function AppContent() {
   // Product Detail
   if (currentPage === "product-detail" && selectedProduct) {
     return (
-      <ProductDetail product={selectedProduct} onBack={handleBackToHome} />
+      <>
+        <NotificationBanner />
+        <ProductDetail product={selectedProduct} onBack={handleBackToHome} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
     );
   }
 
   // Cart
   if (currentPage === "cart") {
-    return <Cart onBack={handleBackToHome} onCheckout={handleCheckoutClick} />;
+    return (
+      <>
+        <NotificationBanner />
+        <Cart onBack={handleBackToHome} onCheckout={handleCheckoutClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
   }
 
   // Checkout
   if (currentPage === "checkout") {
-    return <Checkout onBack={() => setCurrentPage("cart")} onComplete={handleOrderComplete} />;
+    return (
+      <>
+        <NotificationBanner />
+        <Checkout onBack={() => setCurrentPage("cart")} onComplete={handleOrderComplete} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
   }
 
   // Categories
   if (currentPage === "categories") {
-    return <Categories onBack={handleBackToHome} onCategoryClick={handleCategoryClick} />;
+    return (
+      <>
+        <NotificationBanner />
+        <Categories onBack={handleBackToHome} onCategoryClick={handleCategoryClick} />
+        <BottomNavigation currentPage="categories" onNavigate={setCurrentPage} />
+      </>
+    );
   }
 
   // Orders
   if (currentPage === "orders") {
-    return <Orders onBack={handleBackToHome} />;
+    return (
+      <>
+        <NotificationBanner />
+        <Orders onBack={handleBackToHome} />
+        <BottomNavigation currentPage="orders" onNavigate={setCurrentPage} />
+      </>
+    );
   }
 
   // Account
   if (currentPage === "account") {
     return (
-      <Account
-        onBack={handleBackToHome}
-        onAdminAccess={(admin) => {
-          setAdminUser(admin);
-          setCurrentPage("admin-dashboard");
-        }}
-      />
+      <>
+        <NotificationBanner />
+        <Account
+          onBack={handleBackToHome}
+          onAdminLogin={() => setCurrentPage("admin")}
+        />
+        <BottomNavigation currentPage="account" onNavigate={setCurrentPage} />
+      </>
     );
   }
 
   // Category Page
   if (currentPage === "category-page" && selectedCategoryId) {
     return (
-      <CategoryPage
-        categoryId={selectedCategoryId}
-        onBack={handleBackToHome}
-        onProductClick={handleProductClick}
-      />
+      <>
+        <NotificationBanner />
+        <CategoryPage
+          categoryId={selectedCategoryId}
+          onBack={handleBackToHome}
+          onProductClick={handleProductClick}
+        />
+        <BottomNavigation currentPage="categories" onNavigate={setCurrentPage} />
+      </>
     );
   }
 
@@ -215,7 +213,7 @@ function AppContent() {
       <NotificationBanner />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white sticky top-0 z-50">
+      <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white sticky top-10 z-50">
         <div className="p-4 space-y-3">
           {/* Top Bar */}
           <div className="flex items-center justify-between">
@@ -277,11 +275,6 @@ function AppContent() {
           buttonText="Shop Now"
           onButtonClick={() => {}}
         />
-      </div>
-
-      {/* Live Activity Feed */}
-      <div className="px-4 pt-3">
-        <LiveActivity />
       </div>
 
       {/* Video Showcase */}
@@ -373,58 +366,10 @@ function AppContent() {
       <Footer />
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-4 h-16">
-          <button
-            onClick={() => {
-              setActiveTab("home");
-              setCurrentPage("home");
-            }}
-            className={`flex flex-col items-center justify-center gap-1 ${
-              activeTab === "home" ? "text-red-500" : "text-gray-500"
-            }`}
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-xs">Home</span>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("categories");
-              setCurrentPage("categories");
-            }}
-            className={`flex flex-col items-center justify-center gap-1 ${
-              activeTab === "categories" ? "text-red-500" : "text-gray-500"
-            }`}
-          >
-            <Tag className="w-5 h-5" />
-            <span className="text-xs">Categories</span>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("orders");
-              setCurrentPage("orders");
-            }}
-            className={`flex flex-col items-center justify-center gap-1 ${
-              activeTab === "orders" ? "text-red-500" : "text-gray-500"
-            }`}
-          >
-            <ShoppingBag className="w-5 h-5" />
-            <span className="text-xs">Orders</span>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("account");
-              setCurrentPage("account");
-            }}
-            className={`flex flex-col items-center justify-center gap-1 ${
-              activeTab === "account" ? "text-red-500" : "text-gray-500"
-            }`}
-          >
-            <User className="w-5 h-5" />
-            <span className="text-xs">Account</span>
-          </button>
-        </div>
-      </div>
+      <BottomNavigation currentPage="home" onNavigate={(page) => {
+        setCurrentPage(page as Page);
+        setActiveTab(page);
+      }} />
 
       {/* Filter Sheet */}
       <FilterSheet
