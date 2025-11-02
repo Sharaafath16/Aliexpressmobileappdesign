@@ -13,15 +13,17 @@ import {
   Bell,
   Video,
   Tag,
+  Zap,
 } from "lucide-react";
-import { AdminDashboard } from "./admin/AdminDashboard";
-import { AdminProducts } from "./admin/AdminProducts";
-import { AdminOrders } from "./admin/AdminOrders";
-import { AdminUsers } from "./admin/AdminUsers";
+import { AdminDashboardEnhanced } from "./admin/AdminDashboardEnhanced";
+import { AdminProductsEnhanced } from "./admin/AdminProductsEnhanced";
+import { AdminOrdersEnhanced } from "./admin/AdminOrdersEnhanced";
+import { AdminUsersEnhanced } from "./admin/AdminUsersEnhanced";
 import { AdminBanners } from "./admin/AdminBanners";
 import { AdminNotifications } from "./admin/AdminNotifications";
 import { AdminVideos } from "./admin/AdminVideos";
 import { AdminCategories } from "./admin/AdminCategories";
+import { AdminFlashDeals } from "./admin/AdminFlashDeals";
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -34,6 +36,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "products", label: "Products", icon: Package },
+    { id: "flash-deals", label: "Flash Deals", icon: Zap },
     { id: "orders", label: "Orders", icon: ShoppingCart },
     { id: "users", label: "Users", icon: Users },
     { id: "categories", label: "Categories", icon: Tag },
@@ -47,13 +50,15 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <AdminDashboard />;
+        return <AdminDashboardEnhanced />;
       case "products":
-        return <AdminProducts />;
+        return <AdminProductsEnhanced />;
+      case "flash-deals":
+        return <AdminFlashDeals />;
       case "orders":
-        return <AdminOrders />;
+        return <AdminOrdersEnhanced />;
       case "users":
-        return <AdminUsers />;
+        return <AdminUsersEnhanced />;
       case "categories":
         return <AdminCategories />;
       case "banners":
@@ -75,7 +80,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           </div>
         );
       default:
-        return <AdminDashboard />;
+        return <AdminDashboardEnhanced />;
     }
   };
 
@@ -85,19 +90,24 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       <div
         className={`${
           sidebarOpen ? "w-64" : "w-20"
-        } bg-white border-r transition-all duration-300 flex flex-col`}
+        } bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-sm`}
       >
         {/* Logo */}
-        <div className="h-16 border-b flex items-center justify-between px-4">
+        <div className="h-16 border-b border-gray-200 flex items-center justify-between px-4 bg-gradient-to-r from-red-50 to-orange-50">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg"></div>
-              <h1 className="text-lg">Admin Panel</h1>
+              <div className="w-9 h-9 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                <span className="text-sm">AE</span>
+              </div>
+              <div>
+                <h1 className="text-base">AliExpress</h1>
+                <p className="text-xs text-gray-600">Admin Panel</p>
+              </div>
             </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-white rounded-lg transition-colors"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -163,7 +173,9 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         </div>
 
         {/* Page Content */}
-        <div className="p-6">{renderContent()}</div>
+        <div className="overflow-auto" style={{ height: "calc(100vh - 64px)" }}>
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

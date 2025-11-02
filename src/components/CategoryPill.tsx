@@ -9,7 +9,7 @@ export function CategoryPill({ icon, label, active, onClick }: CategoryPillProps
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1.5 min-w-[60px] flex-shrink-0 ${
+      className={`flex flex-col items-center justify-start gap-1.5 min-w-[70px] w-[70px] flex-shrink-0 ${
         active ? "text-red-500" : "text-gray-700"
       }`}
     >
@@ -20,7 +20,7 @@ export function CategoryPill({ icon, label, active, onClick }: CategoryPillProps
       >
         {icon}
       </div>
-      <span className="text-xs text-center line-clamp-1">{label}</span>
+      <span className="text-xs text-center w-full px-1 leading-tight">{label}</span>
     </button>
   );
 }

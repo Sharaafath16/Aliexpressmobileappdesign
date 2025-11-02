@@ -33,6 +33,12 @@ import { Orders } from "./pages/Orders";
 import { Account } from "./pages/Account";
 import { CategoryPage } from "./pages/CategoryPage";
 import { AdminPanel } from "./pages/AdminPanel";
+import { AllProductsPage } from "./pages/AllProductsPage";
+import { ElectronicsPage } from "./pages/ElectronicsPage";
+import { FashionPage } from "./pages/FashionPage";
+import { BeautyPage } from "./pages/BeautyPage";
+import { SportsPage } from "./pages/SportsPage";
+import { ToysPage } from "./pages/ToysPage";
 import { Footer } from "./components/Footer";
 import { PromoBanner } from "./components/PromoBanner";
 import { CountdownTimer } from "./components/CountdownTimer";
@@ -44,7 +50,7 @@ import { CartProvider, useCart } from "./context/CartContext";
 import { flashDeals, products } from "./data/mockProducts";
 import { Toaster } from "./components/ui/sonner";
 
-type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin";
+type Page = "home" | "product-detail" | "cart" | "checkout" | "categories" | "orders" | "account" | "category-page" | "admin" | "all-products" | "electronics-page" | "fashion-page" | "beauty-page" | "sports-page" | "toys-page";
 
 function AppContent() {
   const { getCartCount } = useCart();
@@ -207,6 +213,72 @@ function AppContent() {
     );
   }
 
+  // All Products Page
+  if (currentPage === "all-products") {
+    return (
+      <>
+        <NotificationBanner />
+        <AllProductsPage onBack={handleBackToHome} onProductClick={handleProductClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
+  }
+
+  // Electronics Page
+  if (currentPage === "electronics-page") {
+    return (
+      <>
+        <NotificationBanner />
+        <ElectronicsPage onBack={handleBackToHome} onProductClick={handleProductClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
+  }
+
+  // Fashion Page
+  if (currentPage === "fashion-page") {
+    return (
+      <>
+        <NotificationBanner />
+        <FashionPage onBack={handleBackToHome} onProductClick={handleProductClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
+  }
+
+  // Beauty Page
+  if (currentPage === "beauty-page") {
+    return (
+      <>
+        <NotificationBanner />
+        <BeautyPage onBack={handleBackToHome} onProductClick={handleProductClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
+  }
+
+  // Sports Page
+  if (currentPage === "sports-page") {
+    return (
+      <>
+        <NotificationBanner />
+        <SportsPage onBack={handleBackToHome} onProductClick={handleProductClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
+  }
+
+  // Toys Page
+  if (currentPage === "toys-page") {
+    return (
+      <>
+        <NotificationBanner />
+        <ToysPage onBack={handleBackToHome} onProductClick={handleProductClick} />
+        <BottomNavigation currentPage="home" onNavigate={setCurrentPage} />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 overflow-x-hidden">
       {/* Notification Banner */}
@@ -214,7 +286,7 @@ function AppContent() {
 
       {/* Header */}
       <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white sticky top-10 z-50">
-        <div className="p-4 space-y-3">
+        <div className="p-4">
           {/* Top Bar */}
           <div className="flex items-center justify-between">
             <h1 onClick={() => {
@@ -239,20 +311,22 @@ function AppContent() {
               </button>
             </div>
           </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              placeholder="Search products..."
-              className="pl-10 pr-4 bg-white text-black border-0"
-            />
-          </div>
         </div>
       </div>
 
-      {/* Categories - No scrollbar */}
-      <div className="bg-white p-4">
+      {/* Search Bar Section */}
+      <div className="bg-white px-4 py-3 shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Input
+            placeholder="Search products..."
+            className="pl-10 pr-4 border-gray-200"
+          />
+        </div>
+      </div>
+
+      {/* Categories Section */}
+      <div className="bg-white px-4 py-3 border-t">
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {categories.map((category) => (
             <CategoryPill
@@ -260,7 +334,23 @@ function AppContent() {
               icon={category.icon}
               label={category.label}
               active={activeCategory === category.id}
-              onClick={() => setActiveCategory(category.id)}
+              onClick={() => {
+                setActiveCategory(category.id);
+                // Navigate to category pages
+                if (category.id === "all") {
+                  setCurrentPage("all-products");
+                } else if (category.id === "electronics") {
+                  setCurrentPage("electronics-page");
+                } else if (category.id === "fashion") {
+                  setCurrentPage("fashion-page");
+                } else if (category.id === "beauty") {
+                  setCurrentPage("beauty-page");
+                } else if (category.id === "sports") {
+                  setCurrentPage("sports-page");
+                } else if (category.id === "toys") {
+                  setCurrentPage("toys-page");
+                }
+              }}
             />
           ))}
         </div>
@@ -277,12 +367,13 @@ function AppContent() {
         />
       </div>
 
-      {/* Video Showcase */}
+      {/* Video Showcase - Live Fashion Show */}
       <div className="px-4 pt-3">
         <VideoShowcase
-          thumbnail="https://images.unsplash.com/photo-1464854860390-e95991b46441?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwbW9kZWwlMjBiYW5uZXJ8ZW58MXx8fHwxNzYxNzQ4NjAzfDA&ixlib=rb-4.1.0&q=80&w=1080"
+          thumbnail="https://images.unsplash.com/photo-1469334031218-e382a71b716b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
           title="Live Fashion Show"
-          description="Exclusive collection reveal"
+          description="Exclusive collection reveal - Watch Now"
+          videoUrl="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
         />
       </div>
 
